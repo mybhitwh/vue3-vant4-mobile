@@ -8,14 +8,22 @@ import { OUTPUT_DIR } from './build/constant'
 import { createProxy } from './build/vite/proxy'
 import pkg from './package.json'
 
+// 导入package.json中的配置选项，用于设置__APP_INFO__
 const { dependencies, devDependencies, name, version } = pkg
 
-// 当使用文件系统路径的别名时，请始终使用绝对路径。相对路径的别名值会原封不动地被使用，因此无法被正常解析。
-// path.resolve () 方法用于将一系列路径段解析为绝对路径。它通过处理从右到左的路径序列来工作，在每个路径之前添加，直到创建绝对路径。
+/**
+ * 将相对路径转为绝对路径
+ * 为什么要转换？——当使用文件系统路径的别名时，相对路径的别名值会原封不动地被使用，无法被正常解析。所以，需要始终使用绝对路径。
+ * path.resolve([from ...], to) 方法，用于将一系列路径段解析为绝对路径。
+ * process.cwd() 方法返回 Node.js 进程的当前工作目录的绝对路径
+ * @param dir 相对路径
+ * @returns 绝对路径
+ */
 function pathResolve(dir: string) {
   return resolve(process.cwd(), '.', dir)
 }
 
+// APP信息字面量
 const __APP_INFO__ = {
   // APP 后台管理信息
   pkg: { dependencies, devDependencies, name, version },
@@ -23,17 +31,26 @@ const __APP_INFO__ = {
   lastBuildTime: format(new Date(), 'yyyy-MM-dd HH:mm:ss'),
 }
 
+// 这段 TypeScript 代码定义了一个类型注解，用于指定下方将要声明的对象符合 vite 包里的 UserConfig 接口。这通常用在 vite.config.ts 文件顶部，确保 Vite 配置文件的类型正确无误。简而言之，它声明了一个兼容 Vite 用户配置接口的对象类型。
 /** @type {import('vite').UserConfig} */
 export default ({ command, mode }: ConfigEnv): UserConfig => {
-  // process.cwd() 方法返回 Node.js 进程的当前工作目录
+  // command 返回（dev/serve 或 build）命令模式：（1）yarn dev 返回 dev/serve（2）yarn build 返回 build
   // mode 返回应用的环境模式 development（开发环境） 或者 production（生产环境）
-  // command 返回（dev/serve 或 build）命令模式，yarn dev 返回 dev/serve yarn build 返回 build
+  // process.cwd() 方法返回 Node.js 进程的当前工作目录
   const root = process.cwd()
   // loadEnv() 根据 mode 检查 root(项目根路径) 路径下 .env、.env.development 环境文件，输出 NODE_ENV 和 VITE_ 开头的键值队
   const env = loadEnv(mode, root)
-  // 读取并处理所有环境变量配置文件 .env
+  // 读取并处理所有环境变量配置文件 .env，将键值对转为ViteEnv对象
   const viteEnv = wrapperEnv(env)
 
+  /**
+   * 解构出环境变量配置文件的值
+   * VITE_PUBLIC_PATH —— 网站根目录
+   * VITE_DROP_CONSOLE —— 是否剔除 console.log
+   * VITE_PORT —— 端口号
+   * VITE_PROXY —— 代理配置
+   * VITE_GLOB_PROD_MOCK —— 是否开启生产环境模拟数据
+   */
   const { VITE_PUBLIC_PATH, VITE_DROP_CONSOLE, VITE_PORT, VITE_PROXY, VITE_GLOB_PROD_MOCK }
     = viteEnv
 
