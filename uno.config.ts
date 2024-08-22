@@ -43,11 +43,12 @@ export default defineConfig({
     // 网络字体预设：https://unocss.dev/presets/web-fonts
     presetWebFonts({
       // 默认字体提供商 https://unocss.dev/presets/web-fonts#providers
-      provider: 'google',
+      // provider: 'google',
+      provider: 'none',
       // https://unocss.dev/presets/web-fonts#example
-      fonts: {
-        mono: ['Fira Code'],
-      },
+      // fonts: {
+      //   mono: ['Fira Code'],
+      // },
     }),
   ],
   transformers: [

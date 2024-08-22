@@ -64,6 +64,7 @@ declare global {
     VITE_DROP_CONSOLE: boolean
     VITE_GLOB_PROD_MOCK: boolean
     VITE_GLOB_IMG_URL: string
+    // 定义了一个名为VITE_PROXY的类型为二维数组的变量，用于配置代理服务器的列表。每个二维数组元素由两个字符串组成，第一个元素代表代理服务器的地址，第二个元素代表代理服务器的端口。这个配置常用于开发环境中代理请求。
     VITE_PROXY: [string, string][]
     VITE_BUILD_COMPRESS: 'gzip' | 'brotli' | 'none'
     VITE_BUILD_COMPRESS_DELETE_ORIGIN_FILE: boolean

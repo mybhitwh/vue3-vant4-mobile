@@ -17,19 +17,26 @@ export function isReportMode(): boolean {
   return process.env.REPORT === 'true'
 }
 
-// Read all environment variable configuration files to process.env
-// 读取并处理所有环境变量配置文件 .env
+/**
+ * 读取环境变量配置文件，并写入process.env
+ * 能直接使用Recordable和ViteEnv类型定义的原因是二者在global.d.ts中全局声明
+ * @param envConf 环境变量键值对
+ * @returns
+ */
 export function wrapperEnv(envConf: Recordable): ViteEnv {
   const ret: any = {}
 
   for (const envName of Object.keys(envConf)) {
-    // 去除空格
+    // 将转义序列`\\n`替换为实际的换行符`\n`
     let realName = envConf[envName].replace(/\\n/g, '\n')
+    // 如果环境变量的值为true或false，则转换为布尔值，否则保持不变
     realName = realName === 'true' ? true : realName === 'false' ? false : realName
 
+    // 如果是端口，转为数字
     if (envName === 'VITE_PORT') {
       realName = Number(realName)
     }
+    // 如果是代理配置，转为JSON对象一个由[地址,端口]组成的二维数组
     if (envName === 'VITE_PROXY') {
       try {
         realName = JSON.parse(realName)

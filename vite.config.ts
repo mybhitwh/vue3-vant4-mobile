@@ -1,7 +1,17 @@
 import { resolve } from 'node:path'
+
+// import type，TypeScript语法，只引入类型定义以进行类型检查，不引入具体实现，可以减少打包大小和提高构建速度
+// ConfigEnv配置环境类型，用于获取环境变量配置，以实现条件配置
+// UserConfig类型，用于定义Vite配置对象的类型
 import type { ConfigEnv, UserConfig } from 'vite'
+
+// 加载环境变量，供在配置文件中使用
 import { loadEnv } from 'vite'
+
+// format 函数用于将日期格式化为指定格式的字符串。本例中用于格式化App信息中的最后编译时间
 import { format } from 'date-fns'
+
+// 读取环境变量配置文件，将环境变量键值对转为对象
 import { wrapperEnv } from './build/utils'
 import { createVitePlugins } from './build/vite/plugin'
 import { OUTPUT_DIR } from './build/constant'
@@ -12,8 +22,10 @@ import pkg from './package.json'
 const { dependencies, devDependencies, name, version } = pkg
 
 /**
- * 将相对路径转为绝对路径
- * 为什么要转换？——当使用文件系统路径的别名时，相对路径的别名值会原封不动地被使用，无法被正常解析。所以，需要始终使用绝对路径。
+ * 将相对路径转为绝对路径。
+ *
+ *
+ * 为什么要转换？当使用文件系统路径的别名时，相对路径的别名值会原封不动地被使用，无法被正常解析。所以，需要始终使用绝对路径。
  * path.resolve([from ...], to) 方法，用于将一系列路径段解析为绝对路径。
  * process.cwd() 方法返回 Node.js 进程的当前工作目录的绝对路径
  * @param dir 相对路径
@@ -31,18 +43,23 @@ const __APP_INFO__ = {
   lastBuildTime: format(new Date(), 'yyyy-MM-dd HH:mm:ss'),
 }
 
-// 这段 TypeScript 代码定义了一个类型注解，用于指定下方将要声明的对象符合 vite 包里的 UserConfig 接口。这通常用在 vite.config.ts 文件顶部，确保 Vite 配置文件的类型正确无误。简而言之，它声明了一个兼容 Vite 用户配置接口的对象类型。
+/**
+ * 由于 Vite 附带了 TypeScript 类型，因此你可以通过设置 jsdoc 类型提示来使用 IDE 的代码不全功能。
+ * 传入参数({ command, mode }: ConfigEnv)的目的是为了实现条件配置。
+ * command 返回命令类型，有两个值：
+ *  serve——开发命令，即CLI执行`vite`、`vite dev`或`vite serve`命令；
+ *  build——构建命令，即CLI执行`vite build`命令
+ * mode 返回应用的环境的模式。本示例中，是 development 或者 production
+ */
 /** @type {import('vite').UserConfig} */
 export default ({ command, mode }: ConfigEnv): UserConfig => {
-  // command 返回（dev/serve 或 build）命令模式：（1）yarn dev 返回 dev/serve（2）yarn build 返回 build
-  // mode 返回应用的环境模式 development（开发环境） 或者 production（生产环境）
+  // -----------------读取.env配置文件中的环境变量-----------------
   // process.cwd() 方法返回 Node.js 进程的当前工作目录
   const root = process.cwd()
-  // loadEnv() 根据 mode 检查 root(项目根路径) 路径下 .env、.env.development 环境文件，输出 NODE_ENV 和 VITE_ 开头的键值队
+  // loadEnv() 根据 mode 选择 root 路径下的 .env 类文件，输出以 VITE_ 开头的键值对
   const env = loadEnv(mode, root)
-  // 读取并处理所有环境变量配置文件 .env，将键值对转为ViteEnv对象
+  // 读取并处理所有环境变量配置文件 .env，将键值对转为ViteEnv对象，并写入process.env
   const viteEnv = wrapperEnv(env)
-
   /**
    * 解构出环境变量配置文件的值
    * VITE_PUBLIC_PATH —— 网站根目录
@@ -51,19 +68,16 @@ export default ({ command, mode }: ConfigEnv): UserConfig => {
    * VITE_PROXY —— 代理配置
    * VITE_GLOB_PROD_MOCK —— 是否开启生产环境模拟数据
    */
-  const { VITE_PUBLIC_PATH, VITE_DROP_CONSOLE, VITE_PORT, VITE_PROXY, VITE_GLOB_PROD_MOCK }
-    = viteEnv
-
+  const { VITE_PUBLIC_PATH, VITE_DROP_CONSOLE, VITE_PORT, VITE_PROXY, VITE_GLOB_PROD_MOCK } = viteEnv
   const prodMock = VITE_GLOB_PROD_MOCK
 
+  // 判断是否为生产环境
   const isBuild = command === 'build'
-  // command === 'build'
   return {
     base: VITE_PUBLIC_PATH,
     root,
-
-    // 别名
     resolve: {
+      // 创建文件系统路径别名
       alias: [
         // @/xxxx => src/xxxx
         {
@@ -76,13 +90,15 @@ export default ({ command, mode }: ConfigEnv): UserConfig => {
           replacement: `${pathResolve('types')}/`,
         },
       ],
+      //
       dedupe: ['vue'],
     },
 
-    // 定义全局常量替换方式
+    // 定义全局常量替换
     define: {
-      // 在生产中 启用/禁用 intlify-devtools 和 vue-devtools 支持，默认值 false
-      __INTLIFY_PROD_DEVTOOLS__: false,
+      // 未使用。在生产中 启用/禁用 intlify-devtools 和 vue-devtools 支持，默认值 false
+      __INTLIFY_PROD_DEVTOOLS__: true,
+      // App基本信息，未使用
       __APP_INFO__: JSON.stringify(__APP_INFO__),
     },
 
