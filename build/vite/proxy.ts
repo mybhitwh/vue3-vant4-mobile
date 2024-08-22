@@ -9,15 +9,17 @@ type ProxyList = ProxyItem[]
 
 type ProxyTargetList = Record<string, ProxyOptions & { rewrite: (path: string) => string }>
 
+// js正则表达式语法
 const httpsRE = /^https:\/\//
 
 /**
  * 生成代理
- * @param list
+ * @param list 代理数组，通过.env文件的VITE_PROXY环境变量定义
  */
 export function createProxy(list: ProxyList = []) {
   const ret: ProxyTargetList = {}
   for (const [prefix, target] of list) {
+    // 判断代理地址是否是https协议
     const isHttps = httpsRE.test(target)
 
     // https://github.com/http-party/node-http-proxy#options

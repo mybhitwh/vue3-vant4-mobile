@@ -167,6 +167,7 @@ export default ({ command, mode }: ConfigEnv): UserConfig => {
       open: true,
       // 服务端口号
       port: Number(VITE_PORT),
+      // 服务代理
       proxy: createProxy(VITE_PROXY),
       // 预热文件以降低启动期间的初始页面加载时长
       warmup: {
