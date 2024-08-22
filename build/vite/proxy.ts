@@ -12,7 +12,7 @@ type ProxyTargetList = Record<string, ProxyOptions & { rewrite: (path: string) =
 const httpsRE = /^https:\/\//
 
 /**
- * Generate proxy
+ * 生成代理
  * @param list
  */
 export function createProxy(list: ProxyList = []) {

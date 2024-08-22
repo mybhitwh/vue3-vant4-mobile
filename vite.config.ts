@@ -14,7 +14,10 @@ import { format } from 'date-fns'
 // 读取环境变量配置文件，将环境变量键值对转为对象
 import { wrapperEnv } from './build/utils'
 import { createVitePlugins } from './build/vite/plugin'
+
+// 导入构建输出路径
 import { OUTPUT_DIR } from './build/constant'
+
 import { createProxy } from './build/vite/proxy'
 import pkg from './package.json'
 
@@ -90,7 +93,7 @@ export default ({ command, mode }: ConfigEnv): UserConfig => {
           replacement: `${pathResolve('types')}/`,
         },
       ],
-      //
+      // 删除 vue 的重复依赖
       dedupe: ['vue'],
     },
 
@@ -98,34 +101,24 @@ export default ({ command, mode }: ConfigEnv): UserConfig => {
     define: {
       // 未使用。在生产中 启用/禁用 intlify-devtools 和 vue-devtools 支持，默认值 false
       __INTLIFY_PROD_DEVTOOLS__: true,
-      // App基本信息，未使用
+      // 未使用。App基本信息
       __APP_INFO__: JSON.stringify(__APP_INFO__),
     },
 
     esbuild: {
       // 使用 esbuild 压缩 剔除 console.log
       drop: VITE_DROP_CONSOLE ? ['debugger', 'console'] : [],
-      // minify: true, // minify: true, 等于 minify: 'esbuild',
     },
 
     build: {
-      // 设置最终构建的浏览器兼容目标
-      target: 'es2015',
+      // 设置最终构建的浏览器兼容目标，针对具有原生 ES 模块、原生 ESM 动态导入和 import.meta 支持的浏览器。
+      target: 'modules',
+      // 启用 esbuild 的代码混淆和压缩功能
       minify: 'esbuild',
       // 构建后是否生成 source map 文件(用于线上报错代码报错映射对应代码)
       sourcemap: false,
-      cssTarget: 'chrome80',
       // 指定输出路径（相对于 项目根目录)
       outDir: OUTPUT_DIR,
-      // 只有 minify 为 terser 的时候, 本配置项才能起作用
-      // terserOptions: {
-      //   compress: {
-      //     // 防止 Infinity 被压缩成 1/0，这可能会导致 Chrome 上的性能问题
-      //     keep_infinity: true,
-      //     // 打包是否自动删除 console
-      //     drop_console: VITE_DROP_CONSOLE,
-      //   },
-      // },
       // 启用/禁用 gzip 压缩大小报告
       // 压缩大型输出文件可能会很慢，因此禁用该功能可能会提高大型项目的构建性能
       reportCompressedSize: true,
@@ -133,19 +126,20 @@ export default ({ command, mode }: ConfigEnv): UserConfig => {
       chunkSizeWarningLimit: 2000,
       // 自定义底层的 Rollup 打包配置
       rollupOptions: {
-        // 静态资源分类打包
         output: {
-          chunkFileNames: 'js/[name]-[hash].js', // 引入文件名的名称
-          entryFileNames: 'js/[name]-[hash].js', // 包的入口文件名称
-          assetFileNames: '[ext]/[name]-[hash].[ext]', // 资源文件像 字体，图片等
-          // 将 node_modules 三方依赖包最小化拆分
+          // 定义了共享块的命名规则
+          chunkFileNames: 'js/[name]-[hash].js',
+          // 定义入口点的块的命名规则
+          entryFileNames: 'js/[name]-[hash].js',
+          // 定义静态资源文件的命名规则
+          assetFileNames: '[ext]/[name]-[hash].[ext]',
+          // 通过manualChunks方法，将项目中引用的node_modules中的三方依赖包按包名进行拆分，以达到更细粒度的缓存和并行加载效果。
           manualChunks(id) {
             if (id.includes('node_modules')) {
               const paths = id.toString().split('node_modules/')
               if (paths[2]) {
                 return paths[2].split('/')[0].toString()
               }
-
               return paths[1].split('/')[0].toString()
             }
           },
@@ -155,8 +149,11 @@ export default ({ command, mode }: ConfigEnv): UserConfig => {
 
     css: {
       preprocessorOptions: {
+        // 选择less作为CSS预处理器
         less: {
+          // 允许运行时修改less变量，目前为空，即不允许修改任何变量
           modifyVars: {},
+          // 允许在.less文件中计算内联JavaScript，默认为false，因为这给一些开发人员带来了安全问题。
           javascriptEnabled: true,
           // 注入全局 less 变量
           additionalData: `@import "src/styles/var.less";`,
