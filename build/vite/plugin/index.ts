@@ -11,7 +11,7 @@ import { configVisualizerConfig } from './visualizer'
 import { configSvgIconsPlugin } from './svgSprite'
 
 /**
- * 配置 vite 插件
+ * 创建 vite 插件配置信息
  * @param viteEnv vite 环境变量配置文件键值队 object
  * @param isBuild 是否是 build 环境 true/false
  * @returns vitePlugins[]
@@ -25,31 +25,34 @@ export function createVitePlugins(viteEnv: ViteEnv, isBuild: boolean, prodMock: 
   const { VITE_USE_MOCK, VITE_BUILD_COMPRESS, VITE_BUILD_COMPRESS_DELETE_ORIGIN_FILE } = viteEnv
 
   const vitePlugins: (PluginOption | PluginOption[])[] = [
-    // have to
+    // @vitejs/plugin-vue插件，必备，官方插件
     vue(),
-    // 按需引入VantUi且自动创建组件声明
+    // 按需引入VantUi解析器，用于自动创建组件声明
     Components({
       dts: true,
       resolvers: [VantResolver()],
       types: [],
     }),
-    // UnoCSS
+    // 使用UnoCSS插件
     UnoCSS(),
-
+    // 使用自动导入API插件
     AutoImport({
-      // targets to transform
+      // 定义要使用按需自动导入API的文件
+      // $——匹配字符串的结束
       include: [
         /\.[tj]sx?$/, // .ts, .tsx, .js, .jsx
-        /\.vue$/,
-        /\.vue\?vue/, // .vue
+        /\.vue$/, // .vue
+        /\.vue\?vue/, // .vue?vue
       ],
       imports: [
-        // presets
+        // 预设
         'vue',
         'vue-router',
+        // 自定义
         'pinia',
         '@vueuse/core',
       ],
+      // TypeScript类型定义文件
       dts: 'types/auto-imports.d.ts',
     }),
   ]
