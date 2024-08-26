@@ -8,7 +8,7 @@ const fakeUserList = [
     userId: 1,
     username: 'admin',
     password: '123456',
-    nickname: '一条咸鱼',
+    nickname: '3条咸鱼',
     realname: 'administrator',
     avatar: 'https://fastly.jsdelivr.net/npm/@vant/assets/cat.jpeg',
     cover: '',

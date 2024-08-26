@@ -14,10 +14,10 @@ import { GLOB_CONFIG_FILE_NAME } from '../../constant'
  * @returns 返回HtmlPlugin的配置，用于注入数据和脚本标签
  */
 export function configHtmlPlugin(env: ViteEnv, isBuild: boolean) {
-  // 从环境变量中提取应用标题和公共路径
+  // 从环境变量中提取应用标题和public路径
   const { VITE_GLOB_APP_TITLE, VITE_PUBLIC_PATH } = env
 
-  // 确保公共路径以斜杠结尾
+  // 确保public路径以斜杠结尾
   const path = VITE_PUBLIC_PATH.endsWith('/') ? VITE_PUBLIC_PATH : `${VITE_PUBLIC_PATH}/`
 
   // 获取应用配置文件的路径方法

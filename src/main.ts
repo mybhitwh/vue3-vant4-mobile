@@ -9,7 +9,6 @@ import 'vant/es/image-preview/style'
 import '@unocss/reset/tailwind-compat.css'
 
 // Register icon sprite
-import 'virtual:svg-icons-register'
 import { createApp } from 'vue'
 import App from './App.vue'
 import router, { setupRouter } from './router'
