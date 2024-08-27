@@ -70,13 +70,12 @@ export function createVitePlugins(viteEnv: ViteEnv, isBuild: boolean) {
   // 是否启用mock插件？
   if (VITE_USE_MOCK) {
     // 插件7: mock插件，在开发环境使用mock数据
-    // console.log(`mock插件：是否构建${isBuild}，是否启用mock ${prodMock}`)
     vitePlugins.push(configMockPlugin())
   }
 
+  // 在构建时压缩代码，CSS和HTML
   if (isBuild) {
-    // rollup-plugin-gzip
-    // 加载 gzip 打包
+    // 插件8: rollup-plugin-gzip 压缩插件，在构建过程中使用压缩插件，压缩代码，CSS和HTML
     vitePlugins.push(
       configCompressPlugin(VITE_BUILD_COMPRESS, VITE_BUILD_COMPRESS_DELETE_ORIGIN_FILE),
     )
