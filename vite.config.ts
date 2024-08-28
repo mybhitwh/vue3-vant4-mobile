@@ -70,7 +70,8 @@ export default ({ command, mode }: ConfigEnv): UserConfig => {
    * VITE_PORT —— 端口号
    * VITE_PROXY —— 代理配置
    */
-  const { VITE_PUBLIC_PATH, VITE_DROP_CONSOLE, VITE_PORT, VITE_PROXY } = viteEnv
+  const { VITE_PUBLIC_PATH, VITE_DROP_CONSOLE, VITE_PORT, VITE_PROXY, VITE_GLOB_PROD_MOCK } = viteEnv
+  const prodMock = VITE_GLOB_PROD_MOCK
 
   // 判断是否为生产环境
   const isBuild = command === 'build'
@@ -205,6 +206,6 @@ export default ({ command, mode }: ConfigEnv): UserConfig => {
     },
 
     // 加载插件
-    plugins: createVitePlugins(viteEnv, isBuild),
+    plugins: createVitePlugins(viteEnv, isBuild, prodMock),
   }
 }

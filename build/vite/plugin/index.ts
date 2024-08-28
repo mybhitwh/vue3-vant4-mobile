@@ -15,7 +15,7 @@ import { configVisualizerConfig } from './visualizer'
  * @param isBuild 是否是 build 环境 true/false
  * @returns vitePlugins[]
  */
-export function createVitePlugins(viteEnv: ViteEnv, isBuild: boolean) {
+export function createVitePlugins(viteEnv: ViteEnv, isBuild: boolean, prodMock: boolean) {
   // VITE_BUILD_COMPRESS 是否启用 gzip 压缩或 brotli 压缩
   // 可选: gzip | brotli | none，
   // 如果你需要多种形式，你可以用','来分隔
@@ -70,7 +70,7 @@ export function createVitePlugins(viteEnv: ViteEnv, isBuild: boolean) {
   // 是否启用mock插件？
   if (VITE_USE_MOCK) {
     // 插件7: mock插件，在开发环境使用mock数据
-    vitePlugins.push(configMockPlugin())
+    vitePlugins.push(configMockPlugin(isBuild, prodMock))
   }
 
   // 在构建时压缩代码，CSS和HTML
